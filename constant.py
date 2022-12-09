@@ -1,0 +1,2 @@
+PGM = 'pgm'
+PPM = 'ppm'

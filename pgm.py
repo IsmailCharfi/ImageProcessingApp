@@ -14,33 +14,17 @@ class Pgm:
         self.max_value = max_value
         self.data = data
 
-    def create_pgm_file(self, filename):
+    def create_file(self, filename):
         img = int32(self.data).tolist()
         image = open(filename + ".pgm", 'w')
-        file = open(filename + ".txt", "w+")
-        content = str(img)
-        file.write(content)
-        file.close()
-        width = 0
-        height = 0
-        for row in img:
-            height = height + 1
-            width = len(row)
         image.write(self.magic_number + '\n')
-        image.write(str(width) + ' ' + str(height) + '\n')
-        image.write(str(self.max_value) + '\n')
-        for i in range(height):
-            count = 1
-            for j in range(width):
+        image.write(str(self.columns) + ' ' + str(self.lines) + '\n')
+        image.write(str(self.max_value))
+        for i in range(self.lines):
+            for j in range(self.columns):
                 image.write(str(img[i][j]) + ' ')
-                if count >= 17:
-                    # No line should contain gt 70 chars (17*4=68)
-                    # Max three chars for pixel plus one space
-                    count = 1
-                    image.write('\n')
-                else:
-                    count = count + 1
-            image.write('\n')
+            if (i != self.lines -1):
+                image.write('\n')
         image.close()
 
     def average_gris(self):
@@ -127,3 +111,42 @@ class Pgm:
                     data[i][j] = 255
 
         return Pgm(self.magic_number, self.comment, self.columns, self.lines, self.max_value, data)
+
+    def apply_filter(self, filter):
+        n = filter.shape[0]
+        new_im = np.zeros((self.lines, self.columns))
+        for i in range(0, self.lines):
+            for j in range(0, self.columns):
+                if i < n // 2 or j < n // 2 or i > self.lines - n // 2 - 1 or j > self.columns - n // 2 - 1:
+                    new_im[i, j] = self.data[i, j]
+                else:
+                    window = self.data[i - n // 2: i + n // 2 + 1, j - n // 2: j + n // 2 + 1]
+                    output = np.sum(window * filter)
+                    new_im[i, j] = output
+        return Pgm(self.magic_number, self.comment, self.columns, self.lines, self.max_value, new_im)
+
+    def apply_average_filter(self, n):
+        filter = np.zeros((n, n))
+        for i in range(0, n):
+            for j in range(0, n):
+                filter[i][j] = 1.0 / n
+        return self.apply_filter(filter)
+
+    @staticmethod
+    def create_from_file(file_data):
+        words = file_data[2].split()
+        columns = int(words[0])
+        lines = int(words[1])
+        magic_number = file_data[0]
+        comment = file_data[1]
+        max_value = file_data[3]
+        data = [[0 for x in range(columns)] for y in range(lines)]
+        for i in range(4, len(file_data)):
+            ll = file_data[i].split()
+            for j in range(0, len(ll)):
+                data[i - 4][j] = int(ll[j])
+        return Pgm(magic_number, comment, columns, lines, max_value, data)
+
+    def display_image(self):
+        plt.imshow(self.data, cmap='gray')
+        plt.show()
