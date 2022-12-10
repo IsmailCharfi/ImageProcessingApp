@@ -1,5 +1,4 @@
 from math import floor
-
 import numpy as np
 from matplotlib import image as mpimg, pyplot as plt
 from numpy import random, int32, copy
@@ -112,25 +111,25 @@ class Pgm:
 
         return Pgm(self.magic_number, self.comment, self.columns, self.lines, self.max_value, data)
 
-    def apply_filter(self, filter):
-        n = filter.shape[0]
-        new_im = np.zeros((self.lines, self.columns))
-        for i in range(0, self.lines):
-            for j in range(0, self.columns):
-                if i < n // 2 or j < n // 2 or i > self.lines - n // 2 - 1 or j > self.columns - n // 2 - 1:
-                    new_im[i, j] = self.data[i, j]
-                else:
-                    window = self.data[i - n // 2: i + n // 2 + 1, j - n // 2: j + n // 2 + 1]
-                    output = np.sum(window * filter)
-                    new_im[i, j] = output
-        return Pgm(self.magic_number, self.comment, self.columns, self.lines, self.max_value, new_im.astype(np.uint8))
+    # def apply_filter(self, filter):
+    #     n = filter.shape[0]
+    #     new_im = np.zeros((self.lines, self.columns))
+    #     for i in range(0, self.lines):
+    #         for j in range(0, self.columns):
+    #             if i < n // 2 or j < n // 2 or i > self.lines - n // 2 - 1 or j > self.columns - n // 2 - 1:
+    #                 new_im[i, j] = self.data[i, j]
+    #             else:
+    #                 window = self.data[i - n // 2: i + n // 2 + 1, j - n // 2: j + n // 2 + 1]
+    #                 output = np.sum(window * filter)
+    #                 new_im[i, j] = output
+    #     return Pgm(self.magic_number, self.comment, self.columns, self.lines, self.max_value, new_im.astype(np.uint8))
 
     def apply_average_filter(self, n):
         filter = np.zeros((n, n))
         for i in range(0, n):
             for j in range(0, n):
                 filter[i][j] = 1.0 / n
-        return self.apply_filter(filter)
+        return self.apply_convolution(filter)
 
     @staticmethod
     def create_from_file(file_data):
@@ -150,3 +149,24 @@ class Pgm:
     def display_image(self):
         plt.imshow(self.data, cmap='gray')
         plt.show()
+
+    def signal_to_noise(self, filtered):
+        mean, _ = calculate_mean_std(self.data)
+        upper_part = np.sqrt(((self.data - mean) ** 2).sum())
+        lower_part = np.sqrt(((self.data - filtered) ** 2).sum())
+        return upper_part / lower_part
+
+    def apply_convolution(self, kernel):
+
+        kernel = np.flipud(np.fliplr(kernel))
+        output = np.zeros_like(self.data)
+
+        image_padded = np.zeros((self.data.shape[0] + (kernel.shape[0] - 1),
+                                 self.data.shape[1] + (kernel.shape[1] - 1)))
+        image_padded[(kernel.shape[0] // 2):-(kernel.shape[0] // 2),
+        (kernel.shape[1] // 2):-(kernel.shape[1] // 2)] = self.data
+
+        for x in range(self.data.shape[1]):
+            for y in range(self.data.shape[0]):
+                output[y, x] = (kernel * image_padded[y:y + kernel.shape[0], x:x + kernel.shape[1]]).sum()
+        return Pgm(self.magic_number, self.comment, self.columns, self.lines, self.max_value, output)

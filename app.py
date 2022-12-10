@@ -7,6 +7,7 @@ from pgm import Pgm
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from ppm import Ppm
+import numpy as np
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
@@ -80,6 +81,7 @@ def open_file():
         #         file.write('\n')
         # file.close()
         filtered.display_image()
+        filtered.create_file("filtered")
     else:
         original_ppm = Ppm.create_from_file(file_data)
         original_ppm.create_file("original")
