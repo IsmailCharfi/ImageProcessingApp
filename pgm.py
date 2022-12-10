@@ -23,7 +23,7 @@ class Pgm:
         for i in range(self.lines):
             for j in range(self.columns):
                 image.write(str(img[i][j]) + ' ')
-            if (i != self.lines -1):
+            if (i != self.lines - 1):
                 image.write('\n')
         image.close()
 
@@ -123,7 +123,7 @@ class Pgm:
                     window = self.data[i - n // 2: i + n // 2 + 1, j - n // 2: j + n // 2 + 1]
                     output = np.sum(window * filter)
                     new_im[i, j] = output
-        return Pgm(self.magic_number, self.comment, self.columns, self.lines, self.max_value, new_im)
+        return Pgm(self.magic_number, self.comment, self.columns, self.lines, self.max_value, new_im.astype(np.uint8))
 
     def apply_average_filter(self, n):
         filter = np.zeros((n, n))

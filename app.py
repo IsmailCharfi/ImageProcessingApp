@@ -72,13 +72,13 @@ def open_file():
         noisy_image = original_pgm.noisify_image()
         noisy_image.display_image()
         filtered = noisy_image.apply_average_filter(3)
-        file = open("test.txt", 'w+')
-        for i in range(filtered.lines):
-            for j in range(filtered.columns):
-                file.write(str(filtered.data[i][j]) + ' ')
-            if (i != filtered.lines - 1):
-                file.write('\n')
-        file.close()
+        # file = open("test.txt", 'w+')
+        # for i in range(filtered.lines):
+        #     for j in range(filtered.columns):
+        #         file.write(str(filtered.data[i][j]) + ' ')
+        #     if (i != filtered.lines - 1):
+        #         file.write('\n')
+        # file.close()
         filtered.display_image()
     else:
         original_ppm = Ppm.create_from_file(file_data)
@@ -92,6 +92,7 @@ def open_file():
     button.place_forget()
     radiobutton_frame.place_forget()
     reset_button.place(relx=0.1, rely=0.1)
+
 
 def choose_file_type(type):
     global image_type
