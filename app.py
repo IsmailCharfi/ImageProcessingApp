@@ -81,7 +81,7 @@ def open_file():
         #         file.write('\n')
         # file.close()
         filtered.display_image()
-        filtered.create_file("filtered")
+        print(original_pgm.signal_to_noise(filtered.data))
     else:
         original_ppm = Ppm.create_from_file(file_data)
         original_ppm.create_file("original")

@@ -1,7 +1,7 @@
 from math import floor
 import numpy as np
 from matplotlib import image as mpimg, pyplot as plt
-from numpy import random, int32, copy
+from numpy import random, int32, int64, copy
 
 
 class Pgm:
@@ -150,10 +150,20 @@ class Pgm:
         plt.imshow(self.data, cmap='gray')
         plt.show()
 
+    def calculate_mean_std(self):
+        summ = 0
+        # total sum calculation of matrix
+        for i in range(self.lines):
+            for j in range(self.columns):
+                summ += self.data[i][j]
+
+        return int64(summ / (self.lines * self.columns))
+
     def signal_to_noise(self, filtered):
-        mean, _ = calculate_mean_std(self.data)
+
+        mean = self.calculate_mean_std()
         upper_part = np.sqrt(((self.data - mean) ** 2).sum())
-        lower_part = np.sqrt(((self.data - filtered) ** 2).sum())
+        lower_part = np.sqrt(np.sum((self.data - filtered) ** 2, dtype=np.int64))
         return upper_part / lower_part
 
     def apply_convolution(self, kernel):
