@@ -1,2 +1,2 @@
-PGM = 'pgm'
-PPM = 'ppm'
+PGM = 0
+PPM = 1
