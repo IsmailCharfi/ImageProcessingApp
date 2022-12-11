@@ -22,9 +22,9 @@ image_type = constant.PGM
 main_image_frame = None
 
 # Button to upload image
-button = customtkinter.CTkButton(master=app, text="Upload image", command=lambda: open_file())
+button = customtkinter.CTkButton(
+    master=app, text="Upload image", command=lambda: open_file())
 button.place(relx=0.5, rely=0.65, anchor=tkinter.CENTER)
-reset_button = customtkinter.CTkButton(master=app, text="reset", command=lambda: reset())
 # select image type:
 radiobutton_frame = customtkinter.CTkFrame(app)
 radiobutton_frame.grid(row=0, column=3, padx=(
@@ -46,6 +46,32 @@ radio_button_2 = customtkinter.CTkRadioButton(
     command=lambda: choose_file_type(constant.PPM))
 radio_button_2.grid(row=2, column=2, pady=10, padx=20, sticky="n")
 
+# create sidebar frame with widgets
+sidebar_frame = customtkinter.CTkFrame(app, width=140, corner_radius=0)
+sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
+sidebar_frame.grid_rowconfigure(4, weight=1)
+logo_label = customtkinter.CTkLabel(
+    sidebar_frame, text="Options", font=customtkinter.CTkFont(size=20, weight="bold"))
+logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
+home_button = customtkinter.CTkButton(
+    sidebar_frame, text="Home", command=lambda: reset())
+home_button.grid(row=1, column=0, padx=20, pady=10)
+nosify_button = customtkinter.CTkButton(
+    sidebar_frame, text="Nosify")
+nosify_button.grid(row=2, column=0, padx=20, pady=10)
+equalize_button = customtkinter.CTkButton(sidebar_frame, text="Equalizer")
+equalize_button.grid(row=3, column=0, padx=20, pady=10)
+home_button.configure(state="disabled")
+nosify_button.configure(state="disabled")
+equalize_button.configure(state="disabled")
+# slider
+slider_progressbar_frame = customtkinter.CTkFrame(app, fg_color="transparent")
+slider_progressbar_frame.grid(
+    row=8, column=5, columnspan=2, padx=(20, 0), pady=(20, 0), sticky="sw")
+slider_1 = customtkinter.CTkSlider(
+    slider_progressbar_frame, from_=0, to=1, number_of_steps=4)
+slider_1.grid(row=3, column=0, padx=(200, 10), pady=(100, 10), sticky="sw")
+
 
 def open_file():
     global original_pgm
@@ -61,7 +87,8 @@ def open_file():
     elif image_type == constant.PPM:
         message = 'Ppm File'
         type = '*.ppm'
-    filename = customtkinter.filedialog.askopenfilename(filetypes=[(message, type)])
+    filename = customtkinter.filedialog.askopenfilename(
+        filetypes=[(message, type)])
     file = open(filename, "r")
     file_data = file.readlines()
     file.close()
@@ -73,6 +100,7 @@ def open_file():
         noisy_image = original_pgm.noisify_image()
         noisy_image.display_image()
         filtered = noisy_image.apply_average_filter(3)
+
         # file = open("test.txt", 'w+')
         # for i in range(filtered.lines):
         #     for j in range(filtered.columns):
@@ -81,7 +109,7 @@ def open_file():
         #         file.write('\n')
         # file.close()
         filtered.display_image()
-        print(original_pgm.signal_to_noise(filtered.data))
+        # print(original_pgm.signal_to_noise(filtered.data))
     else:
         original_ppm = Ppm.create_from_file(file_data)
         original_ppm.create_file("original")
@@ -90,10 +118,20 @@ def open_file():
     image = ImageTk.PhotoImage(image_file)
     main_image_frame = tkinter.Label(image=image)
     main_image_frame.image = image
-    main_image_frame.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER)
+    main_image_frame.place(relx=0.3, rely=0.1, anchor=tkinter.NW)
+
     button.place_forget()
     radiobutton_frame.place_forget()
-    reset_button.place(relx=0.1, rely=0.1)
+    home_button.configure(state="enabled")
+    nosify_button.configure(state="enabled")
+    nosify_button.configure(command=lambda: show_noisy(image_file))
+    equalize_button.configure(state="enabled")
+
+
+def show_noisy(image_file):
+    image1 = ImageTk.PhotoImage(image_file)
+    result_image_frame = tkinter.Label(image=image1)
+    result_image_frame.place(relx=0.5, rely=0.1, anchor=tkinter.NW)
 
 
 def choose_file_type(type):
@@ -106,10 +144,10 @@ def reset():
     global original_ppm
     global image_type
     global main_image_frame
-    global reset_button
+    global home_button
 
     main_image_frame.place_forget()
-    reset_button.place_forget()
+    home_button.configure(state="disabled")
     original_ppm = None
     original_pgm = None
     radiobutton_frame.place(relx=0.5, rely=0.45, anchor=tkinter.CENTER)
