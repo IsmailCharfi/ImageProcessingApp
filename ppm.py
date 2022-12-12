@@ -23,7 +23,7 @@ class Ppm:
         for i in range(len(self.data)):
             for j in range(0, 3):
                 image.write(str(self.data[i][j]) + ' ')
-            if (count >= self.columns ):
+            if count >= self.columns:
                 image.write('\n')
                 count = 1
             else:
@@ -32,17 +32,17 @@ class Ppm:
         image.close()
 
     def threshold(self, r, g, b):
-        new_data = copy.copy(self.data)
-        for i in range(0, len(img)):
+        new_data = copy(self.data)
+        for i in range(0, len(new_data)):
             if int(self.data[i][0]) < int(r):
                 new_data[i] = tuple((0, new_data[i][1], new_data[i][2]))
             else:
                 new_data[i] = tuple((255, new_data[i][1], new_data[i][2]))
-            if int(img[i][1]) < g:
+            if int(new_data[i][1]) < g:
                 new_data[i] = tuple((new_data[i][0], 0, new_data[i][2]))
             else:
                 new_data[i] = tuple((new_data[i][0], 255, new_data[i][2]))
-            if int(img[i][2]) < b:
+            if int(new_data[i][2]) < b:
                 new_data[i] = tuple((new_data[i][0], new_data[i][1], 0))
             else:
                 new_data[i] = tuple((new_data[i][0], new_data[i][1], 255))
@@ -50,7 +50,7 @@ class Ppm:
         return Ppm(self.magic_number, self.comment, self.columns, self.lines, self.max_value, new_data)
 
     def and_threshold(self, r, g, b):
-        new_data = copy.copy(self.data)
+        new_data = copy(self.data)
         for i in range(0, len(self.data)):
             if not (int(self.data[i][0]) > int(r) and int(self.data[i][1]) > int(g) and int(self.data[i][2]) > int(b)):
                 new_data[i] = tuple((0, 0, 0))
@@ -59,7 +59,7 @@ class Ppm:
         return Ppm(self.magic_number, self.comment, self.columns, self.lines, self.max_value, new_data)
 
     def or_threshold(self, r, g, b):
-        new_data = copy.copy(self.data)
+        new_data = copy(self.data)
         for i in range(0, len(self.data)):
             if not (int(self.data[i][0]) > int(r) or int(self.data[i][1]) > g or int(self.data[i][2]) > b):
                 new_data[i] = tuple((0, 0, 0))

@@ -22,7 +22,7 @@ class Pgm:
         for i in range(self.lines):
             for j in range(self.columns):
                 image.write(str(img[i][j]) + ' ')
-            if (i != self.lines - 1):
+            if i != self.lines - 1:
                 image.write('\n')
         image.close()
 
@@ -48,7 +48,7 @@ class Pgm:
         arr = np.zeros(256)
         for el in self.data:
             for num in el:
-                arr[num] += 1
+                arr[int(num)] += 1
         return arr
 
     # cumulated histogram
@@ -94,7 +94,7 @@ class Pgm:
         for i in range(self.lines):
             for j in range(self.columns):
                 index = self.data[i][j]
-                data[i][j] = n1[index]
+                data[i][j] = n1[int(index)]
 
         return Pgm(self.magic_number, self.comment, self.columns, self.lines, self.max_value, data)
 
@@ -139,7 +139,7 @@ class Pgm:
         magic_number = file_data[0]
         comment = file_data[1]
         max_value = file_data[3]
-        data = [[0 for x in range(columns)] for y in range(lines)]
+        data = np.zeros((lines, columns)).astype(np.int32)
         for i in range(4, len(file_data)):
             ll = file_data[i].split()
             for j in range(0, len(ll)):
@@ -178,5 +178,14 @@ class Pgm:
 
         for x in range(self.data.shape[1]):
             for y in range(self.data.shape[0]):
-                output[y, x] = (kernel * image_padded[y:y + kernel.shape[0], x:x + kernel.shape[1]]).sum()
-        return Pgm(self.magic_number, self.comment, self.columns, self.lines, self.max_value, output)
+                output[y, x] = floor((kernel * image_padded[y:y + kernel.shape[0], x:x + kernel.shape[1]]).sum())
+        return Pgm(self.magic_number, self.comment, self.columns, self.lines, self.max_value, output.astype(np.int32))
+
+    def apply_median(self, size):
+        image = copy(self.data)
+        y, x = image.shape
+        new_image = np.zeros((y, x))
+        for i in range(y):
+            for j in range(x):
+                new_image[i][j] = np.median(image[i:i + size, j:j + size])
+        return Pgm(self.magic_number, self.comment, self.columns, self.lines, self.max_value, new_image)
